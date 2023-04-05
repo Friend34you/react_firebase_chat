@@ -14,12 +14,15 @@ import {
 import {Context} from "../index";
 import {Avatar, Button, Container, Grid, Input, TextField} from "@mui/material";
 import Loader from "./Loader";
+import login from "./Login";
+import Message from "./Message";
 
 const Chat = () => {
     const {auth, firestore} = useContext(Context);
     const [user] = useAuthState(auth);
     const [value, setValue] = useState("");
     const [messagesData, setMessagesData] = useState([]);
+    const textRef = useRef()
 
     function onChange(e) {
         setValue(e.target.value)
@@ -57,6 +60,21 @@ const Chat = () => {
         });
     };
 
+
+    useEffect(() => {
+        const onKeyDown =  e => {
+            if (e.keyCode === 13) {
+                 sendMessage();
+            }
+        }
+        let node = textRef.current
+        console.log(node)
+        node.addEventListener('keydown', onKeyDown);
+        return function () {
+            node.removeEventListener('keydown', onKeyDown);
+        };
+    }, [value, setValue]) ;
+
     useEffect(() => {
         getMessages();
     }, []);
@@ -76,49 +94,27 @@ const Chat = () => {
                     borderRadius: 8
                 }}>
                     {messagesData.map((message) =>
-                        <div
+                        <Message
                             key={message.createdAt}
-                            style={{
-                                margin: 20,
-                                padding: 8,
-                                border: user.uid === message.uid
-                                    ? "2px solid green"
-                                    : "2px solid black",
-                                borderRadius: 5,
-                                marginLeft: user.uid === message.uid
-                                    ? "auto"
-                                    : "10px",
-                                width: "fit-content",
-                                maxWidth: "50%",
-                            }}>
-                            <Grid
-                                container
-                                alignItems={"center"}>
-                                <Avatar src={message.photoURL}/>
-                                <div>{message.displayName}</div>
-                            </Grid>
-                            <div style={{padding: 4, whiteSpace: "pre-wrap", overflowWrap: "break-word"}}>
-                                {message.text}
-                            </div>
-                        </div>
+                            user={user}
+                            message={message}/>
                     )}
                 </div>
-                <form onSubmit={sendMessage}>
-                    <Grid
-                        container
-                        direction={"column"}
-                        alignItems={"flex-end"}
-                        width={"80%"}>
-                        <TextField
-                            fullWidth
-                            multiline
-                            minRows={2}
-                            maxRows={2}
-                            value={value}
-                            onChange={onChange}/>
-                        <Button onClick={sendMessage} type={"submit"}>Отправить</Button>
-                    </Grid>
-                </form>
+                <Grid
+                    container
+                    direction={"column"}
+                    alignItems={"flex-end"}
+                    width={"80%"}>
+                    <TextField
+                        fullWidth
+                        multiline
+                        minRows={2}
+                        maxRows={2}
+                        value={value}
+                        ref={textRef}
+                        onChange={onChange}/>
+                    <Button onClick={sendMessage} type={"submit"}>Отправить</Button>
+                </Grid>
             </Grid>
         </Container>
     );
