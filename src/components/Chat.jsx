@@ -3,18 +3,13 @@ import {useAuthState} from "react-firebase-hooks/auth";
 import {
     collection,
     addDoc,
-    Timestamp,
     serverTimestamp,
-    getDocs,
-    doc,
     query,
     onSnapshot,
     orderBy,
 } from "firebase/firestore";
 import {Context} from "../index";
-import {Avatar, Button, Container, Grid, Input, TextField} from "@mui/material";
-import Loader from "./Loader";
-import login from "./Login";
+import {Button, Container, Grid, TextField} from "@mui/material";
 import Message from "./Message";
 
 const Chat = () => {
@@ -23,6 +18,7 @@ const Chat = () => {
     const [value, setValue] = useState("");
     const [messagesData, setMessagesData] = useState([]);
     const textRef = useRef()
+    const scrollRef = useRef()
 
     function onChange(e) {
         setValue(e.target.value)
@@ -36,7 +32,6 @@ const Chat = () => {
                 photoURL: user.photoURL,
                 text: value,
                 createdAt: serverTimestamp(),
-                // createdAt: Timestamp.fromDate(new Date()),
             });
 
             console.log("Document written with ID: ", docRef.id);
@@ -62,22 +57,23 @@ const Chat = () => {
 
 
     useEffect(() => {
-        const onKeyDown =  e => {
+        let node = textRef.current;
+        const onKeyDown = e => {
             if (e.keyCode === 13) {
-                 sendMessage();
+                sendMessage();
+                scrollRef.current.scrollIntoView({block: "end", inline: "nearest" });
             }
         }
-        let node = textRef.current
-        console.log(node)
+
         node.addEventListener('keydown', onKeyDown);
         return function () {
             node.removeEventListener('keydown', onKeyDown);
         };
-    }, [value, setValue]) ;
+    }, [value, setValue]);
 
     useEffect(() => {
         getMessages();
-    }, []);
+    }, [messagesData, setMessagesData]);
 
     return (
         <Container>
@@ -93,11 +89,13 @@ const Chat = () => {
                     border: "2px solid grey",
                     borderRadius: 8
                 }}>
-                    {messagesData.map((message) =>
+                    {messagesData.map((message, index) =>
                         <Message
+                            innerRef={index === messagesData.length - 1 ? scrollRef : null }
                             key={message.createdAt}
                             user={user}
-                            message={message}/>
+                            message={message}
+                        />
                     )}
                 </div>
                 <Grid

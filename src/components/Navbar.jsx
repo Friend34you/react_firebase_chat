@@ -5,10 +5,6 @@ import {LOGIN_ROUTE} from "../utils/consts";
 import {Context} from "../index";
 import {useAuthState} from "react-firebase-hooks/auth";
 
-function MenuIcon() {
-    return null;
-}
-
 const Navbar = () => {
     const {auth} = useContext(Context);
     const [user] = useAuthState(auth)

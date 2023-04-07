@@ -1,9 +1,10 @@
 import React from 'react';
 import {Avatar, Grid} from "@mui/material";
 
-const Message = ({message, user}) => {
+const Message = ({message, user, innerRef}) => {
     return (
         <div
+            ref={innerRef}
             style={{
                 margin: 20,
                 padding: 8,
